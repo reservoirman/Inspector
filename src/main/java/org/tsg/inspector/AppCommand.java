@@ -18,6 +18,8 @@ package org.tsg.inspector;
 import org.apache.karaf.shell.commands.Command;
 import org.onosproject.cli.AbstractShellCommand;
 import java.util.Scanner;
+import org.onosproject.net.HostId;
+import org.apache.karaf.shell.commands.Argument;
 
 /*
  * Sample Apache Karaf CLI command
@@ -26,12 +28,19 @@ import java.util.Scanner;
          description = "Sample Apache Karaf CLI command")
 public class AppCommand extends AbstractShellCommand {
 
+    @Argument(index = 0, name = "hostId", description = "Host ID of source", required = false, multiValued = false)
+    private String hostId = null;
+
     @Override
     protected void execute() {
         print("Hello %s", "World");
-        print(">");
-        Scanner s = new Scanner(System.in);
-	String sentence = s.nextLine();
+        
+	if (hostId != null) {
+	    print("The host is %s", hostId);
+	}
+	//print(">");
+        //Scanner s = new Scanner(System.in);
+	//String sentence = s.nextLine();
 	
     }
 

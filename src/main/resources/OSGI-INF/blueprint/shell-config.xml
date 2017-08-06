@@ -18,7 +18,11 @@
     <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
         <command>
             <action class="org.tsg.inspector.AppCommand"/>
-        </command>
+        	<completers>
+		    <ref component-id="hostIdCompleter"/>
+		    <null/>
+		</completers>
+	</command>
     </command-bundle>
-
+    <bean id="hostIdCompleter" class="org.onosproject.cli.net.HostIdCompleter"/>
 </blueprint>
