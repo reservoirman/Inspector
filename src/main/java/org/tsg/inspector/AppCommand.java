@@ -28,7 +28,7 @@ import org.apache.karaf.shell.commands.Argument;
          description = "Sample Apache Karaf CLI command")
 public class AppCommand extends AbstractShellCommand {
 
-    @Argument(index = 0, name = "hostId", description = "Host ID of source", required = false, multiValued = false)
+    @Argument(index = 0, name = "holla", description = "Host ID of source", required = false, multiValued = false)
     private String hostId = null;
 
     @Override
