@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.stream.StreamSupport;
+import java.util.ArrayList;
 
 import org.onosproject.app.ApplicationService;
 import org.onosproject.cli.AbstractChoicesCompleter;
@@ -39,16 +40,24 @@ public class Holla extends AbstractChoicesCompleter {
         // Fetch the service and return the list of app names
         ApplicationService service = get(ApplicationService.class);
         Iterator<Application> it = service.getApplications().iterator();
+	
+	ArrayList<String> testList = new ArrayList<String>();
+	
+	testList.add("10.0.0.1");
+	testList.add("10.0.0.2");
+	testList.add("10.0.0.3");
+	testList.add("10.0.0.4");
 
         // Filter the list of apps, selecting only the installed ones.
         // Add each app name to the list of choices.
-        return
+        return testList;
+/*
             StreamSupport.stream(
                 Spliterators.spliteratorUnknownSize(it, Spliterator.ORDERED), false)
                     .filter(app -> service.getState(app.id()) == INSTALLED)
                     .map(app -> app.id().name())
                     .collect(toList());
-
+*/
     }
 
 }

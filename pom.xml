@@ -86,8 +86,9 @@
 
         <dependency>
       <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.core</artifactId>
-      <version>4.3.1</version>
+      <artifactId>org.osgi.compendium</artifactId>
+      <!--<artifactId>org.osgi.core</artifactId>
+      <version>4.3.1</version> do not limit it to this version TSG -->
       <scope>provided</scope>
     </dependency>
 

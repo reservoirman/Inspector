@@ -18,6 +18,8 @@ package org.tsg.inspector;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.osgi.service.component.ComponentContext;
+
 
 /**
  * Set of tests of the ONOS application component.
@@ -25,11 +27,10 @@ import org.junit.Test;
 public class AppComponentTest {
 
     private AppComponent component;
-
     @Before
     public void setUp() {
         component = new AppComponent();
-        component.activate();
+        component.activate(null);
 
     }
 

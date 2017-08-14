@@ -22,10 +22,10 @@
 		    <ref component-id="HollaCompleter"/>
 		</completers>
 		<optional-completers>
-		 <entry key="-a" value-ref="HollaCompleter"/>
+		 <entry key="-a" value-ref="DeviceCompleter"/>
             	</optional-completers>
 	</command>
     </command-bundle>
-    <bean id="HostCompleter" class="org.onosproject.cli.net.DeviceIdCompleter"/>
+    <bean id="DeviceCompleter" class="org.onosproject.cli.net.DeviceIdCompleter"/>
     <bean id="HollaCompleter" class="org.tsg.inspector.Holla"/>
 </blueprint>
