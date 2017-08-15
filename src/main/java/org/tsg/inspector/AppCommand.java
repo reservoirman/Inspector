@@ -57,6 +57,10 @@ public class AppCommand extends AbstractShellCommand {
             required = false, multiValued = true)
     private List<String> dstTcpString = null;
 
+    @Option(name = "-protocol", description = "Displays the packets for the specified protocol only.  A list of protocols may also be specified",
+            required = false, multiValued = true)
+    private String protocol = null;
+
 
     @Override
     protected void execute() {
