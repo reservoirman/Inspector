@@ -22,6 +22,8 @@ import org.onosproject.net.HostId;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Option;
 import java.util.List;
+import java.sql.*;
+import org.onosproject.net.packet.PacketService;
 /*
  * Sample Apache Karaf CLI command
  */
@@ -64,8 +66,12 @@ public class AppCommand extends AbstractShellCommand {
 
     @Override
     protected void execute() {
-        print("Hello %s", "World");
-        
+	Connection conn;
+    System.out.println(String.format("Hello %s", "World"));
+	PacketService ps = get(PacketService.class);
+	if (ps != null) {
+		print("Packet Service: %s", ps.toString());
+ 	}
 	if (hostId != null) {
 	    print("The host is %s", hostId);
 	}

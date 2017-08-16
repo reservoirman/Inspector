@@ -65,6 +65,11 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 //import org.apache.karaf.shell.commands.Command;
 //import org.onosproject.cli.AbstractShellCommand;
+//import org.apache.karaf.shell.commands.Argument;
+//import org.apache.karaf.shell.commands.Option;
+
+
+
 
 /**
  * Sample reactive forwarding application.
@@ -162,7 +167,7 @@ public class AppComponent {
     @Activate
     public void activate(ComponentContext context) {
         cfgService.registerProperties(getClass());
-        appId = coreService.registerApplication("org.onosproject.fwd");
+        appId = coreService.registerApplication("org.tsg.inspector");
 
         packetService.addProcessor(processor, PacketProcessor.ADVISOR_MAX + 2);
         readComponentConfiguration(context);
@@ -355,6 +360,11 @@ public class AppComponent {
         return enabled;
     }
 
+	static public class Holla {
+
+		static public int PacketSize;
+ 	}
+
     /**
      * Packet processor responsible for forwarding packets along their paths.
      */
@@ -372,10 +382,14 @@ public class AppComponent {
 
             InboundPacket pkt = context.inPacket();
             Ethernet ethPkt = pkt.parsed();
+			Holla.PacketSize = pkt.unparsed().capacity();
+			System.out.println("%packet size = " +  pkt.unparsed().capacity());
+			log.info("PacketService = {}", packetService.toString());
 
             if (ethPkt == null) {
                 return;
             }
+
 
             // Bail if this is deemed to be a control packet.
             if (isControlPacket(ethPkt)) {
