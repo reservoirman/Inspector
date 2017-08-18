@@ -34,6 +34,9 @@ import static org.onosproject.cli.AbstractShellCommand.get;
  * All installed application name completer.
  */
 public class Holla extends AbstractChoicesCompleter {
+
+	public static int PacketSize = 0;
+
     @Override
     public List<String> choices() {
 

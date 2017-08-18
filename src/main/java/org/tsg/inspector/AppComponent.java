@@ -62,7 +62,8 @@ import java.util.Set;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.slf4j.LoggerFactory.getLogger;
-
+//newly added by TSG:
+import org.apache.felix.scr.annotations.Service;
 //import org.apache.karaf.shell.commands.Command;
 //import org.onosproject.cli.AbstractShellCommand;
 //import org.apache.karaf.shell.commands.Argument;
@@ -75,7 +76,8 @@ import static org.slf4j.LoggerFactory.getLogger;
  * Sample reactive forwarding application.
  */
 @Component(immediate = true)
-public class AppComponent {
+@Service
+public class AppComponent implements InspectorPacketService {
 
     private static final int DEFAULT_TIMEOUT = 10;
     private static final int DEFAULT_PRIORITY = 10;
@@ -168,6 +170,8 @@ public class AppComponent {
     public void activate(ComponentContext context) {
         cfgService.registerProperties(getClass());
         appId = coreService.registerApplication("org.tsg.inspector");
+	
+	//Socket socket = new Socket("localhost", 1004);
 
         packetService.addProcessor(processor, PacketProcessor.ADVISOR_MAX + 2);
         readComponentConfiguration(context);
@@ -360,15 +364,13 @@ public class AppComponent {
         return enabled;
     }
 
-	static public class Holla {
 
-		static public int PacketSize;
- 	}
 
     /**
      * Packet processor responsible for forwarding packets along their paths.
      */
-    private class ReactivePacketProcessor implements PacketProcessor {
+    	private class ReactivePacketProcessor implements PacketProcessor {
+
 
         @Override
         public void process(PacketContext context) {
@@ -385,7 +387,6 @@ public class AppComponent {
 			Holla.PacketSize = pkt.unparsed().capacity();
 			System.out.println("%packet size = " +  pkt.unparsed().capacity());
 			log.info("PacketService = {}", packetService.toString());
-
             if (ethPkt == null) {
                 return;
             }
