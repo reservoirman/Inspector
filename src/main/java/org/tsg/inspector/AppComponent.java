@@ -65,6 +65,8 @@ import static org.slf4j.LoggerFactory.getLogger;
 //newly added by TSG:
 import org.apache.felix.scr.annotations.Service;
 import java.util.*;
+import org.onlab.packet.ARP;
+import org.onlab.packet.MacAddress;
 //import org.apache.karaf.shell.commands.Command;
 //import org.onosproject.cli.AbstractShellCommand;
 //import org.apache.karaf.shell.commands.Argument;
@@ -165,6 +167,9 @@ public class AppComponent implements InspectorPacketService {
             label = "Enable matching ICMPv4 and ICMPv6 fields; " +
                 "default is false")
     private boolean matchIcmpFields = false;
+
+	
+
 
 
     @Activate
@@ -386,10 +391,76 @@ public class AppComponent implements InspectorPacketService {
 			return protocolList;
 		}
 
+		HashMap<String, PacketStatsType> stats = new HashMap<String, PacketStatsType>();
+		
 		public void gatherStatistics(PacketContext context) {
 			InboundPacket pkt = context.inPacket();
             Ethernet ethPkt = pkt.parsed();
-			Holla.PacketSize = pkt.unparsed().capacity();
+			
+			//get eth type:
+			short ethType = ethPkt.getEtherType();
+			
+
+			//if LLDP (amd BSN, RARP, VLAN), get source MAC and dest MAC only (no IP, ports, or protocol)
+			MacAddress srcMac = ethPkt.getSourceMAC();
+			MacAddress dstMac = ethPkt.getDestinationMAC();
+
+			byte[] srcIp = new byte[1];
+			byte[] dstIp = new byte[1];
+			byte protocol = 0;
+			short srcPort = 0;
+			short dstPort = 0;
+			//if ARP, get source MAC source IP, dest MAC dest IP only (no ports or protoool)
+			if (ethType == Ethernet.TYPE_ARP)
+			{
+				ARP macPkt = (ARP)ethPkt.getPayload();
+				srcIp = macPkt.getSenderProtocolAddress();
+				dstIp = macPkt.getTargetProtocolAddress();
+			}			
+			else if (ethType == Ethernet.TYPE_IPV4) {
+				IPv4 ipv4Pkt = (IPv4)ethPkt.getPayload();
+				srcIp = IPv4.toIPv4AddressBytes(ipv4Pkt.getSourceAddress());
+				dstIp = IPv4.toIPv4AddressBytes(ipv4Pkt.getDestinationAddress());
+				protocol = ipv4Pkt.getProtocol();
+				switch(protocol) {
+					case IPv4.PROTOCOL_TCP:
+						TCP tcp4Pkt = (TCP)ipv4Pkt.getPayload();
+						srcPort = tcp4Pkt.getSourcePort();
+						dstPort = tcp4Pkt.getDestinationPort();
+						break;
+					case IPv4.PROTOCOL_UDP:
+						UDP udp4Pkt = (UDP)ipv4Pkt.getPayload();
+						srcPort = udp4Pkt.getSourcePort();
+						dstPort = udp4Pkt.getDestinationPort();
+						break;
+					default: break;
+				}
+			}
+			else if (ethType == Ethernet.TYPE_IPV6) {
+                IPv6 ipv6Pkt = (IPv6)ethPkt.getPayload();
+                srcIp = ipv6Pkt.getSourceAddress();
+                dstIp = ipv6Pkt.getDestinationAddress();
+                protocol = ipv6Pkt.getNextHeader();
+                switch(protocol) {
+                    case IPv6.PROTOCOL_TCP:
+                        TCP tcp6Pkt = (TCP)ipv6Pkt.getPayload();
+                        srcPort = tcp6Pkt.getSourcePort();
+                        dstPort = tcp6Pkt.getDestinationPort();
+                        break;
+                    case IPv6.PROTOCOL_UDP:
+                        UDP udp6Pkt = (UDP)ipv6Pkt.getPayload();
+                        srcPort = udp6Pkt.getSourcePort();
+                        dstPort = udp6Pkt.getDestinationPort();
+                        break;
+                    default: break;
+                }
+			}
+
+
+			//SourceDestType.						 
+
+			//get packet size
+			long packetSize = pkt.unparsed().capacity();
 			System.out.println("%packet size = " +  pkt.unparsed().capacity());
 			log.info("PacketService = {}", packetService.toString());
 		}

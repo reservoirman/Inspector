@@ -6,7 +6,8 @@ import java.io.*;
 import org.onlab.packet.Ethernet;
 import org.onlab.packet.IPv4;
 import org.onlab.packet.IPv6;
-import org.onlab.packet.IpAddress;
+import org.onlab.packet.Ip4Address;
+import org.onlab.packet.Ip6Address;
 import org.onlab.packet.TCP;
 import org.onlab.packet.UDP;
 import org.onlab.packet.MacAddress;
@@ -23,82 +24,93 @@ public class SourceDestType {
 	String PortSrc;
 	String PortDst;
 	
-	static public String createKey(short etherType, byte protocol, MacAddress macSrc, int ipSrc, short portSrc, MacAddress macDst, int ipDst, short portDst) {
-		String key = "";
-	
+	static public String createKey(short etherType, byte protocol, MacAddress macSrc, byte[] ipSrc, short portSrc, MacAddress macDst, byte[] ipDst, short portDst) {
+
+		String k1,k2,k3,k4="N/A",k5="N/A",k6,k7="N/A",k8="N/A";	
 		//etherType
 		switch (etherType) {
 			case Ethernet.TYPE_ARP:
-				key += "ARP"; break;
+				k1 = "ARP"; break;
 			case Ethernet.TYPE_RARP: 
-				key += "RARP"; break;
+				k1 = "RARP"; break;
 			case Ethernet.TYPE_IPV4:
-				key += "IPV4"; break;
+				k1 = "IPV4"; break;
 			case Ethernet.TYPE_IPV6:
-				key += "IPV6"; break;
+				k1 = "IPV6"; break;
 			case Ethernet.TYPE_LLDP:
-				key += "LLDP"; break;
+				k1 = "LLDP"; break;
 			case Ethernet.TYPE_VLAN:
-				key += "VLAN"; break;
+				k1 = "VLAN"; break;
 			case Ethernet.VLAN_UNTAGGED:
-				key += "VLAN UNTAGGED"; break;
+				k1 = "VLAN UNTAGGED"; break;
 			default:
-				key += "UNKNOWN ETHERNET TYPE"; break;
-		}
-		
-		key += ",";	
+				k1 = "UNKNOWN"; break;
+		}	
 
 		//protocol
 		switch (protocol) {
 			case IPv4.PROTOCOL_ICMP:
-				key += "ICMP"; break;
+				k2 = "ICMP"; break;
 			case IPv6.PROTOCOL_TCP:
-				key += "TCP"; break;
+				k2 = "TCP"; break;
 			case IPv6.PROTOCOL_UDP:
-				key += "UDP"; break;
+				k2 = "UDP"; break;
 			case IPv6.PROTOCOL_AH:
-				key += "AH"; break;
+				k2 = "AH"; break;
 			case IPv6.PROTOCOL_DSTOPT:
-				key += "DSTOPT"; break;
+				k2 = "DSTOPT"; break;
 			case IPv6.PROTOCOL_ESP:
-				key += "ESP"; break;
+				k2 = "ESP"; break;
 			case IPv6.PROTOCOL_HOPOPT:
-				key += "HOPOPT"; break;
+				k2 = "HOPOPT"; break;
 			case IPv6.PROTOCOL_ICMP6:
-				key += "ICMP6"; break;
+				k2 = "ICMP6"; break;
 			case IPv6.PROTOCOL_ROUTING:
-				key += "ROUTING"; break;
+				k2 = "ROUTING"; break;
 			default:
-				key += "PROTOCOL NOT APPLICABLE";
+				k2 = "N/A";
 				break;
 		}
 		
-		key += ",";
 
 		//MAC Source
-		key += macSrc.toString();
-		key += ",";
+		k3 = macSrc.toString();
 
 		//IP Source
-		key += IpAddress.valueOf(ipSrc).toString();
-		key += ",";
+		if (ipSrc.length > 1) {
+            if (ipSrc.length == 4) {
+                k7 = Ip4Address.valueOf(ipSrc).toString();
+            }
+            else {
+                k7 = Ip6Address.valueOf(ipSrc).toString();
+            }
+
+		}
 		
 		//Port Source
-		key += String.valueOf(portSrc);
-		key += ",";
+		if (portSrc != 0) {
+			k5 = String.valueOf(portSrc);
+		}
 
 		//MAC Dest
-        key += macDst.toString();
-        key += ",";     
+        k6 = macDst.toString();
+             
         //IP Dest
-        key += IpAddress.valueOf(ipDst).toString();
-        key += ",";     
+        if (ipDst.length > 1) {
+			if (ipDst.length == 4) {
+				k7 = Ip4Address.valueOf(ipDst).toString();
+			}
+			else {
+				k7 = Ip6Address.valueOf(ipDst).toString();
+			}
+        }     
 
         //Port Source
-        key += String.valueOf(portDst);
-
+        if (portDst != 0) {
+			k8 = String.valueOf(portDst);
+		}
 			
-		return key;
+		return String.format("%s,%s,%s,%s,%s,%s,%s,%s", k1,k2,k3,k4,k5,k6,k7,k8);
 	} 
 
 	@Override
@@ -117,20 +129,22 @@ public class SourceDestType {
 
 	@Override
 	public String toString() {
-		return String.format("%s,%s,%s,%s,%s,%s", MACSrc, IPSrc, PortSrc, MACDst, IPDst, PortDst);
+		return String.format("%s,%s,%s,%s,%s,%s,%s,%s", EthType, Protocol, MACSrc, IPSrc, PortSrc, MACDst, IPDst, PortDst);
 	}
 
 	static SourceDestType toSourceDestType(String s) {
 		String[] ss = s.split(",");
-		if (ss.length == 6)
+		if (ss.length == 8)
 		{
 			SourceDestType sdt = new SourceDestType();
-			sdt.MACSrc =	ss[0];
-			sdt.IPSrc = 	ss[1];
-			sdt.PortSrc = 	ss[2];
-			sdt.MACDst = 	ss[3];
-			sdt.IPDst =		ss[4];
-			sdt.PortDst = 	ss[5];	
+			sdt.EthType = 	ss[0];
+			sdt.Protocol =  ss[1];
+			sdt.MACSrc =	ss[2];
+			sdt.IPSrc = 	ss[3];
+			sdt.PortSrc = 	ss[4];
+			sdt.MACDst = 	ss[5];
+			sdt.IPDst =		ss[6];
+			sdt.PortDst = 	ss[7];	
 			return sdt;
 		}
 		else return null;
