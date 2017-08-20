@@ -45,7 +45,8 @@ public class Holla extends AbstractChoicesCompleter {
         Iterator<Application> it = service.getApplications().iterator();
 	
 	ArrayList<String> testList = new ArrayList<String>();
-	
+	InspectorPacketService ips =  get(InspectorPacketService.class);
+	testList.add(ips.holla);		
 	testList.add("10.0.0.1");
 	testList.add("10.0.0.2");
 	testList.add("10.0.0.3");

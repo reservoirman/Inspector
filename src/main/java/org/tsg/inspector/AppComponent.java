@@ -64,6 +64,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.slf4j.LoggerFactory.getLogger;
 //newly added by TSG:
 import org.apache.felix.scr.annotations.Service;
+import java.util.*;
 //import org.apache.karaf.shell.commands.Command;
 //import org.onosproject.cli.AbstractShellCommand;
 //import org.apache.karaf.shell.commands.Argument;
@@ -364,13 +365,40 @@ public class AppComponent implements InspectorPacketService {
         return enabled;
     }
 
+		private HashSet<String> ipAddrList = new HashSet<String>();
+		private HashSet<String> macAddrList = new HashSet<String>();
+		private HashSet<String> portList = new HashSet<String>();
+		private HashSet<String> protocolList = new HashSet<String>();
+		private HashSet<String> ethTypeList = new HashSet<String>();
+	    public Set<String> getIPAddrList() {
+			return ipAddrList;
+		}
+    	public Set<String> getMACAddrList() {
+			return macAddrList;
+		}
+		public Set<String> getPortList() {
+			return portList;
+		}
+		public Set<String> getEthTypeList() {
+			return ethTypeList;
+		}
+		public Set<String> getProtocolList() {
+			return protocolList;
+		}
+
+		public void gatherStatistics(PacketContext context) {
+			InboundPacket pkt = context.inPacket();
+            Ethernet ethPkt = pkt.parsed();
+			Holla.PacketSize = pkt.unparsed().capacity();
+			System.out.println("%packet size = " +  pkt.unparsed().capacity());
+			log.info("PacketService = {}", packetService.toString());
+		}
 
 
     /**
      * Packet processor responsible for forwarding packets along their paths.
      */
     	private class ReactivePacketProcessor implements PacketProcessor {
-
 
         @Override
         public void process(PacketContext context) {
@@ -381,13 +409,12 @@ public class AppComponent implements InspectorPacketService {
             if (context.isHandled()) {
                 return;
             }
-
-            InboundPacket pkt = context.inPacket();
+			
+			gatherStatistics(context);
+			InboundPacket pkt = context.inPacket();
             Ethernet ethPkt = pkt.parsed();
-			Holla.PacketSize = pkt.unparsed().capacity();
-			System.out.println("%packet size = " +  pkt.unparsed().capacity());
-			log.info("PacketService = {}", packetService.toString());
-            if (ethPkt == null) {
+	
+           if (ethPkt == null) {
                 return;
             }
 
