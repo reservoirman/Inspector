@@ -32,41 +32,38 @@ import org.tsg.inspector.InspectorPacketService;
          description = "Displays the default table with the following columns: source IP, source MAC, source port, dest IP, dest MAC, dest port, protocol, packet count, packet avg size, packet bandwidth")
 public class AppCommand extends AbstractShellCommand {
 
-    @Argument(index = 0, name = "holla", description = "Host ID of source", required = false, multiValued = false)
-    private String hostId = null;
-
     // Selectors
     @Option(name = "-sip", description = "Displays the packets from the specified source IP address only.  A list of source IP addresses may also be specified.  Aggregate values for each will also be shown.",
             required = false, multiValued = false)
-    private String srcIpString = null;
+    private String d = null;
 
     @Option(name = "-dip", description = "Displays the packets from the specified destination IP address only.  A list of destination IP addresses may also be specified.  Aggregate values for each will also be shown.",
             required = false, multiValued = false)
-    private String dstIpString = null;
+    private String g = null;
 
     @Option(name = "-smac", description = "Displays the packets from the specified source MAC address only.  A list of source MAC addresses may also be specified.  Aggregate values for each will also be shown.",
-            required = false, multiValued = true)
-    private String srcMacString = null;
+            required = false, multiValued = false)
+    private String c = null;
 
     @Option(name = "-dmac", description = "Displays the packets from the specified destination MAC address only.  A list of destination MAC addresses may also be specified.  Aggregate values for each will also be shown.",
             required = false, multiValued = false)
-    private String dstMacString = null;
+    private String f = null;
 
     @Option(name = "-sport", description = "Displays the packets from the specified source TCP port only.  A list of source ports may also be specified",
-            required = false, multiValued = true)
-    private String srcTcpString = null;
+            required = false, multiValued = false)
+    private String e = null;
 
     @Option(name = "-dport", description = "Displays the packets from the specified destination TCP port only.  A list of destination ports may also be specified",
-            required = false, multiValued = true)
-    private String dstTcpString = null;
+            required = false, multiValued = false)
+    private String h = null;
 
     @Option(name = "-protocol", description = "Displays the packets for the specified protocol only.  A list of protocols may also be specified",
-            required = false, multiValued = true)
-    private String protocol = null;
+            required = false, multiValued = false)
+    private String b = null;
 
     @Option(name = "-ethtype", description = "Displays the packets for the specified ethernet type only.  A list of protocols may also be specified",
-            required = false, multiValued = true)
-    private String ethernetType = null;
+            required = false, multiValued = false)
+    private String a = null;
 
 
     @Override
@@ -75,10 +72,10 @@ public class AppCommand extends AbstractShellCommand {
 	PacketService ps = get(PacketService.class);
 	InspectorPacketService ips = get(InspectorPacketService.class);
 	if (ips != null) {
-		print(ips.getStats());
-		for (String s : ips.getPortList()) {
-			print(s);	
-		}
+		//print(ips.getStats());
+		String [] abc = {a, b, c, d, e, f, g, h};
+		print(ips.getStats(abc));
+		
 		
 		
 	}

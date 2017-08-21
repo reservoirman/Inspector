@@ -175,6 +175,51 @@ public class SourceDestType {
 		return output.toString();
 	}
 
+	static public String outputStats(HashMap<String, PacketStatsType> stats, String [] args) {
+		StringBuilder output = new StringBuilder();
+        String title = ipv4Title, row = ipv4Row;
+        if (ipv6enabled == true) {
+            title = ipv6Title;
+            row = ipv6Row;
+        }
+        output.append(title);
+		HashMap<Integer, String> matches = new HashMap<Integer, String>();
+		for (int i = 0; i < args.length; i++) {
+			if (args[i] != null) {
+				matches.put(i, args[i]);
+			}
+		}
+		if (matches.size() == 0) {
+			return SourceDestType.outputStats(stats);
+		}	
+		
+		String [] keys = {};
+        for (Map.Entry<String, PacketStatsType> entry : stats.entrySet()) {
+			keys = entry.getKey().split("\\s*\\|");
+			
+			boolean match = true;
+			for (Map.Entry<Integer,String> k : matches.entrySet()) {
+				if (keys[k.getKey()].equals(k.getValue()) == false) {
+					match = false;
+					break;
+				}
+			}		
+			if (match == true) {	
+            	long p1 = entry.getValue().packetCount;
+            	long p2 = entry.getValue().packetBandwidth;
+            	long p3 = p2/p1;
+            	String value = String.format(ipValue, p1, p2, p3);
+            	output.append(entry.getKey());
+            	output.append(value);
+			}
+        }
+
+		return output.toString();
+		// + "\n" + matches.get(0) + "\n" + String.format("%s,%s,%s,%s,%s,%s,%s,%s", keys[0],keys[1], keys[2],keys[3],keys[4],keys[5],keys[6],keys[7]);
+
+
+	}
+
 	@Override
 	public String toString() {
 		return String.format("%-10s|%-10s|%-18s|%s|%-8s|%-18s|%s|%-8s", EthType, Protocol, MACSrc, IPSrc, PortSrc, MACDst, IPDst, PortDst);

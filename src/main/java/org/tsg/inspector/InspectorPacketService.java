@@ -17,5 +17,6 @@ public interface InspectorPacketService {
 	public void gatherStatistics(PacketContext context);
 	public String getStats();
 	public void clearStats();
+	public String getStats(String [] args);
 	
 }

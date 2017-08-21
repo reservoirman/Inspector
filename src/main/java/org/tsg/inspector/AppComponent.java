@@ -495,8 +495,12 @@ public class AppComponent implements InspectorPacketService {
 	public String getStats()
 	{
 		String output = SourceDestType.outputStats(stats);
-		log.info("{}", output);
 		return output;
+	}
+	
+	public String getStats(String[] args) {
+		String output = SourceDestType.outputStats(stats, args);
+		return output;	
 	}
 
 	public void clearStats()
