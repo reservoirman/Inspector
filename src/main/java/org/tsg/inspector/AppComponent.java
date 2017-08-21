@@ -413,9 +413,9 @@ public class AppComponent implements InspectorPacketService {
 			//if ARP, get source MAC source IP, dest MAC dest IP only (no ports or protoool)
 			if (ethType == Ethernet.TYPE_ARP)
 			{
-				ARP macPkt = (ARP)ethPkt.getPayload();
-				srcIp = macPkt.getSenderProtocolAddress();
-				dstIp = macPkt.getTargetProtocolAddress();
+				ARP arpPkt = (ARP)ethPkt.getPayload();
+				srcIp = arpPkt.getSenderProtocolAddress();
+				dstIp = arpPkt.getTargetProtocolAddress();
 			}			
 			else if (ethType == Ethernet.TYPE_IPV4) {
 				IPv4 ipv4Pkt = (IPv4)ethPkt.getPayload();
@@ -456,15 +456,53 @@ public class AppComponent implements InspectorPacketService {
                 }
 			}
 
-
-			//SourceDestType.						 
-
+			String key = SourceDestType.createKey(this, ethType, protocol, srcMac, srcIp, srcPort, dstMac, dstIp, dstPort);
+			//System.out.println("key = " + key);
+			//log.info("key = {}", key);
+		
+			//split key and add the various fields to their respective HashSets: (now being done in SourceDestType)
+			/* String k[] = s.split("[\\p{Punct}\\s]+");
+			ethTypeList.add(k[0]);
+			protocolList.add(k[1]);
+			macAddressList.add(k[2]);
+			macAddressList.add(k[5]);
+			ipAddressList.add(k[3]);
+			ipAddressList.add(k[6]);
+			portList.add(k[4]);
+			portList.add(k[7]);			
+			*/
 			//get packet size
 			long packetSize = pkt.unparsed().capacity();
-			System.out.println("%packet size = " +  pkt.unparsed().capacity());
-			log.info("PacketService = {}", packetService.toString());
+			
+			PacketStatsType p = stats.get(key);
+			
+			if (p == null) {
+				p = new PacketStatsType();
+				p.packetCount = 1;
+				p.packetBandwidth = packetSize;
+			}	
+			else
+			{
+				p.packetCount++;
+				p.packetBandwidth += packetSize;
+			}
+			stats.put(key, p);
+
+			//System.out.println("%packet size = " +  pkt.unparsed().capacity());
+			//log.info("PacketService = {}", packetService.toString());
 		}
 
+	public String getStats()
+	{
+		String output = SourceDestType.outputStats(stats);
+		log.info("{}", output);
+		return output;
+	}
+
+	public void clearStats()
+	{
+		stats.clear();
+	}
 
     /**
      * Packet processor responsible for forwarding packets along their paths.

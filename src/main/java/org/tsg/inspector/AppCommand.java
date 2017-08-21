@@ -54,34 +54,35 @@ public class AppCommand extends AbstractShellCommand {
 
     @Option(name = "-sport", description = "Displays the packets from the specified source TCP port only.  A list of source ports may also be specified",
             required = false, multiValued = true)
-    private List<String> srcTcpString = null;
+    private String srcTcpString = null;
 
     @Option(name = "-dport", description = "Displays the packets from the specified destination TCP port only.  A list of destination ports may also be specified",
             required = false, multiValued = true)
-    private List<String> dstTcpString = null;
+    private String dstTcpString = null;
 
     @Option(name = "-protocol", description = "Displays the packets for the specified protocol only.  A list of protocols may also be specified",
             required = false, multiValued = true)
     private String protocol = null;
 
+    @Option(name = "-ethtype", description = "Displays the packets for the specified ethernet type only.  A list of protocols may also be specified",
+            required = false, multiValued = true)
+    private String ethernetType = null;
+
 
     @Override
     protected void execute() {
 	Connection conn;
-    System.out.println(String.format("Hello %s", "World"));
 	PacketService ps = get(PacketService.class);
 	InspectorPacketService ips = get(InspectorPacketService.class);
 	if (ips != null) {
-		print(ips.holla);
+		print(ips.getStats());
+		for (String s : ips.getPortList()) {
+			print(s);	
+		}
+		
+		
 	}
 
-	if (ps != null) {
-		print("Packet Service: %s", ps.toString());
-		print("%d", Holla.PacketSize);
- 	}
-	if (hostId != null) {
-	    print("The host is %s", hostId);
-	}
 	//print(">");
         //Scanner s = new Scanner(System.in);
 	//String sentence = s.nextLine();

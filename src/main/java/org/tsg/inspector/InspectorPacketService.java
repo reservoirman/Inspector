@@ -15,5 +15,7 @@ public interface InspectorPacketService {
 	public Set<String> getProtocolList();
 	public Set<String> getEthTypeList();
 	public void gatherStatistics(PacketContext context);
+	public String getStats();
+	public void clearStats();
 	
 }

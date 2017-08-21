@@ -24,7 +24,17 @@ public class SourceDestType {
 	String PortSrc;
 	String PortDst;
 	
-	static public String createKey(short etherType, byte protocol, MacAddress macSrc, byte[] ipSrc, short portSrc, MacAddress macDst, byte[] ipDst, short portDst) {
+	private static boolean ipv6enabled = false;
+	
+	private static String ipv4Title = "ETH TYPE|PROTOCOL|  SRC MAC ADDRESS |  SRC IP ADDRESS |SRC PORT|  DST MAC ADDRESS |  DST IP ADDRESS |DST PORT|PACKET COUNT|TOTAL BANDWIDTH|AVG PACKET SIZE|\n";
+	private static String ipv6Title = "ETH TYPE|PROTOCOL|  SRC MAC ADDRESS |          SRC IP ADDRESS  (IPv6)         |SRC PORT|          MAC IP ADDRESS  (IPv6)         |  DST IP ADDRESS |DST PORT|PACKET COUNT|TOTAL BANDWIDTH|AVG PACKET SIZE|\n";   	
+	private static String ipv4Row = "%-8s|%-8s|%-18s|%-17s|%-8s|%-18s|%-17s|%-8s|%-12s|%-15s|%-15s\n";
+	private static String ipv6Row = "%-8s|%-8s|%-18s|%-40s|%-8s|%-18s|%-40s|%-8s|%-12s|%-15s|%-15s\n";
+	private static String ipv4Key = "%-8s|%-8s|%-18s|%-17s|%-8s|%-18s|%-17s|%-8s|";
+	private static String ipv6Key = "%-8s|%-8s|%-18s|%-40s|%-8s|%-18s|%-40s|%-8s|";
+	private static String ipValue = "%-12d|%-15d|%-15d\n";  
+
+	static public String createKey(AppComponent app, short etherType, byte protocol, MacAddress macSrc, byte[] ipSrc, short portSrc, MacAddress macDst, byte[] ipDst, short portDst) {
 
 		String k1,k2,k3,k4="N/A",k5="N/A",k6,k7="N/A",k8="N/A";	
 		//etherType
@@ -42,7 +52,7 @@ public class SourceDestType {
 			case Ethernet.TYPE_VLAN:
 				k1 = "VLAN"; break;
 			case Ethernet.VLAN_UNTAGGED:
-				k1 = "VLAN UNTAGGED"; break;
+				k1 = "VLAN_UT"; break;
 			default:
 				k1 = "UNKNOWN"; break;
 		}	
@@ -79,10 +89,11 @@ public class SourceDestType {
 		//IP Source
 		if (ipSrc.length > 1) {
             if (ipSrc.length == 4) {
-                k7 = Ip4Address.valueOf(ipSrc).toString();
+                k4 = Ip4Address.valueOf(ipSrc).toString();
             }
             else {
-                k7 = Ip6Address.valueOf(ipSrc).toString();
+				ipv6enabled = true;
+                k4 = Ip6Address.valueOf(ipSrc).toString();
             }
 
 		}
@@ -101,6 +112,7 @@ public class SourceDestType {
 				k7 = Ip4Address.valueOf(ipDst).toString();
 			}
 			else {
+				ipv6enabled = true;
 				k7 = Ip6Address.valueOf(ipDst).toString();
 			}
         }     
@@ -109,8 +121,22 @@ public class SourceDestType {
         if (portDst != 0) {
 			k8 = String.valueOf(portDst);
 		}
-			
-		return String.format("%s,%s,%s,%s,%s,%s,%s,%s", k1,k2,k3,k4,k5,k6,k7,k8);
+		String keyrow = ipv4Key;
+		if (ipv6enabled == true) {
+			keyrow = ipv6Key;
+		}
+
+		app.getEthTypeList().add(k1);
+        app.getProtocolList().add(k2);
+        app.getMACAddrList().add(k3);
+        app.getMACAddrList().add(k6);
+        app.getIPAddrList().add(k4);
+        app.getIPAddrList().add(k7);
+        app.getPortList().add(k5);
+        app.getPortList().add(k8);
+
+		return String.format(keyrow, k1,k2,k3,k4,k5,k6,k7,k8);	
+		//return String.format("%-10s|%-10s|%-18s|%s|%-8s|%-18s|%s|%-8s", k1,k2,k3,k4,k5,k6,k7,k8);
 	} 
 
 	@Override
@@ -127,9 +153,31 @@ public class SourceDestType {
 		return true;
 	}
 
+
+	static public String outputStats(HashMap<String, PacketStatsType> stats) {
+		StringBuilder output = new StringBuilder();
+		String title = ipv4Title, row = ipv4Row;
+		if (ipv6enabled == true) {
+			title = ipv6Title;
+			row = ipv6Row;
+		}
+		output.append(title);
+		
+		for (Map.Entry<String, PacketStatsType> entry : stats.entrySet()) {
+			long p1 = entry.getValue().packetCount;
+			long p2 = entry.getValue().packetBandwidth;
+			long p3 = p2/p1; 
+			String value = String.format(ipValue, p1, p2, p3);
+			output.append(entry.getKey());
+			output.append(value); 
+		}
+
+		return output.toString();
+	}
+
 	@Override
 	public String toString() {
-		return String.format("%s,%s,%s,%s,%s,%s,%s,%s", EthType, Protocol, MACSrc, IPSrc, PortSrc, MACDst, IPDst, PortDst);
+		return String.format("%-10s|%-10s|%-18s|%s|%-8s|%-18s|%s|%-8s", EthType, Protocol, MACSrc, IPSrc, PortSrc, MACDst, IPDst, PortDst);
 	}
 
 	static SourceDestType toSourceDestType(String s) {
