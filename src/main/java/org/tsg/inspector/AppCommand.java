@@ -22,9 +22,18 @@ import org.onosproject.net.HostId;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Option;
 import java.util.List;
-import java.sql.*;
+//import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import org.onosproject.net.packet.PacketService;
 import org.tsg.inspector.InspectorPacketService;
+import java.io.*;
+import java.lang.ClassNotFoundException;
+import org.sqlite.JDBC;
+
 /*
  * Sample Apache Karaf CLI command
  */
@@ -65,10 +74,39 @@ public class AppCommand extends AbstractShellCommand {
             required = false, multiValued = false)
     private String a = null;
 
+	public static void tryDB() //throws ClassNotFoundException
+	{
+    	try {
+        	Class.forName("org.sqlite.JDBC");
+        	//Class.forName("com.mysql.jdbc.Driver");
+			String fileName = "test.db";
+
+        	String url = "jdbc:sqlite:test.db";// + fileName;
+			//String url = "jdbc:mysql://localhost/test?";
+        	Connection conn = DriverManager.getConnection(url);
+           	if (conn != null) {
+           		//DatabaseMetaData meta = conn.getMetaData();
+           	    //System.out.println("The driver name is " + meta.getDriverName());
+           	    System.out.println("A new database has been created.");
+        	}
+    	}
+    	catch (Exception e) {
+   	     	System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        //System.exit(0);
+			StackTraceElement[] st = Thread.currentThread().getStackTrace();
+			for (int i =0 ; i < st.length; i++)
+			{
+				System.out.println(st[i].toString());
+			}
+		
+			//e.printStackTree();
+ 	   }
+
+	}
 
     @Override
     protected void execute() {
-	Connection conn;
+	//Connection conn;
 	PacketService ps = get(PacketService.class);
 	InspectorPacketService ips = get(InspectorPacketService.class);
 	if (ips != null) {
@@ -76,10 +114,12 @@ public class AppCommand extends AbstractShellCommand {
 		String [] abc = {a, b, c, d, e, f, g, h};
 		print(ips.getStats(abc));
 		
-		
-		
+		 System.out.println("Working Directory = " +
+              System.getProperty("user.dir"));
+	
+		//AppCommand.tryDB();	
 	}
-
+	
 	//print(">");
         //Scanner s = new Scanner(System.in);
 	//String sentence = s.nextLine();

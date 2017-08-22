@@ -78,26 +78,36 @@
         </dependency>
 
         <dependency>
-      <groupId>org.onosproject</groupId>
-      <artifactId>onos-cli</artifactId>
-      <version>${onos.version}</version>
-      <scope>provided</scope>
-    </dependency>
+	      	<groupId>org.onosproject</groupId>
+			<artifactId>onos-cli</artifactId>
+			<version>${onos.version}</version>
+      		<scope>provided</scope>
+		</dependency>
 
         <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.compendium</artifactId>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.compendium</artifactId>
       <!--<artifactId>org.osgi.core</artifactId>
       <version>4.3.1</version> do not limit it to this version TSG -->
-      <scope>provided</scope>
-    </dependency>
-
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.xerial</groupId>
+			<artifactId>sqlite-jdbc</artifactId>
+			<version>3.7.2</version>
+		</dependency>
         <dependency>
-      <groupId>org.apache.karaf.shell</groupId>
-      <artifactId>org.apache.karaf.shell.console</artifactId>
-      <version>3.0.3</version>
-      <scope>provided</scope>
-    </dependency>
+      		<groupId>org.apache.karaf.shell</groupId>
+      		<artifactId>org.apache.karaf.shell.console</artifactId>
+      		<version>3.0.3</version>
+      		<scope>provided</scope>
+    	</dependency>
+<!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java 
+<dependency>
+    <groupId>mysql</groupId>
+    <artifactId>mysql-connector-java</artifactId>
+    <version>5.1.6</version>
+</dependency>-->
     </dependencies>
 
     <build>

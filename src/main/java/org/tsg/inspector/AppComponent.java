@@ -67,6 +67,7 @@ import org.apache.felix.scr.annotations.Service;
 import java.util.*;
 import org.onlab.packet.ARP;
 import org.onlab.packet.MacAddress;
+import java.io.*;
 //import org.apache.karaf.shell.commands.Command;
 //import org.onosproject.cli.AbstractShellCommand;
 //import org.apache.karaf.shell.commands.Argument;
@@ -182,6 +183,13 @@ public class AppComponent implements InspectorPacketService {
         packetService.addProcessor(processor, PacketProcessor.ADVISOR_MAX + 2);
         readComponentConfiguration(context);
         requestPackests();
+
+        try {
+        PrintWriter p = new PrintWriter("/home/mininet/onos/apps/inspector/holla.csv");
+        p.println("Hello welcome");
+        p.close();
+        } catch(IOException e){}
+
 
         log.info("Started with Application ID {}", appId.id());
     }
@@ -641,6 +649,8 @@ public class AppComponent implements InspectorPacketService {
         Ethernet inPkt = context.inPacket().parsed();
         TrafficSelector.Builder selectorBuilder = DefaultTrafficSelector.builder();
 
+	packetOut(context, portNumber); return;
+	/*
         // If PacketOutOnly or ARP packet than forward directly to output port
         if (packetOutOnly || inPkt.getEtherType() == Ethernet.TYPE_ARP) {
             packetOut(context, portNumber);
@@ -775,6 +785,6 @@ public class AppComponent implements InspectorPacketService {
             packetOut(context, PortNumber.TABLE);
         } else {
             packetOut(context, portNumber);
-        }
+        }*/
     }
 }

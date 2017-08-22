@@ -27,11 +27,11 @@ public class SourceDestType {
 	private static boolean ipv6enabled = false;
 	
 	private static String ipv4Title = "ETH TYPE|PROTOCOL|  SRC MAC ADDRESS |  SRC IP ADDRESS |SRC PORT|  DST MAC ADDRESS |  DST IP ADDRESS |DST PORT|PACKET COUNT|TOTAL BANDWIDTH|AVG PACKET SIZE|\n";
-	private static String ipv6Title = "ETH TYPE|PROTOCOL|  SRC MAC ADDRESS |          SRC IP ADDRESS  (IPv6)         |SRC PORT|          MAC IP ADDRESS  (IPv6)         |  DST IP ADDRESS |DST PORT|PACKET COUNT|TOTAL BANDWIDTH|AVG PACKET SIZE|\n";   	
+	private static String ipv6Title = "ETH TYPE|PROTOCOL|  SRC MAC ADDRESS |    SRC IP ADDRESS      |SRC PORT|  DST MAC ADDRESS |    DST IP ADDRESS      |DST PORT|PACKET COUNT|TOTAL BANDWIDTH|AVG PACKET SIZE|\n";   	
 	private static String ipv4Row = "%-8s|%-8s|%-18s|%-17s|%-8s|%-18s|%-17s|%-8s|%-12s|%-15s|%-15s\n";
-	private static String ipv6Row = "%-8s|%-8s|%-18s|%-40s|%-8s|%-18s|%-40s|%-8s|%-12s|%-15s|%-15s\n";
+	private static String ipv6Row = "%-8s|%-8s|%-18s|%-25s|%-8s|%-18s|%-25s|%-8s|%-12s|%-15s|%-15s\n";
 	private static String ipv4Key = "%-8s|%-8s|%-18s|%-17s|%-8s|%-18s|%-17s|%-8s|";
-	private static String ipv6Key = "%-8s|%-8s|%-18s|%-40s|%-8s|%-18s|%-40s|%-8s|";
+	private static String ipv6Key = "%-8s|%-8s|%-18s|%-25s|%-8s|%-18s|%-25s|%-8s|";
 	private static String ipValue = "%-12d|%-15d|%-15d\n";  
 
 	static public String createKey(AppComponent app, short etherType, byte protocol, MacAddress macSrc, byte[] ipSrc, short portSrc, MacAddress macDst, byte[] ipDst, short portDst) {
@@ -100,7 +100,7 @@ public class SourceDestType {
 		
 		//Port Source
 		if (portSrc != 0) {
-			k5 = String.valueOf(portSrc);
+			k5 = String.format("%d", Short.toUnsignedInt(portSrc)); 
 		}
 
 		//MAC Dest
@@ -119,7 +119,7 @@ public class SourceDestType {
 
         //Port Source
         if (portDst != 0) {
-			k8 = String.valueOf(portDst);
+			k8 = String.format("%d", Short.toUnsignedInt(portDst)); 
 		}
 		String keyrow = ipv4Key;
 		if (ipv6enabled == true) {
