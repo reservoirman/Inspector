@@ -9,9 +9,12 @@ import org.onosproject.net.packet.PacketContext;
 public interface InspectorPacketService {
 
 	public String holla = "Service connection good!  Holla!";
-	public Set<String> getIPAddrList();
-	public Set<String> getMACAddrList();
-	public Set<String> getPortList();
+	public Set<String> getSIPAddrList();
+	public Set<String> getSMACAddrList();
+	public Set<String> getSPortList();
+	public Set<String> getDIPAddrList();
+	public Set<String> getDMACAddrList();
+	public Set<String> getDPortList();
 	public Set<String> getProtocolList();
 	public Set<String> getEthTypeList();
 	public void gatherStatistics(PacketContext context);

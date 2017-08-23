@@ -26,16 +26,24 @@ public class SourceDestType {
 	
 	private static boolean ipv6enabled = false;
 	
-	private static String ipv4Title = "ETH TYPE|PROTOCOL|  SRC MAC ADDRESS |  SRC IP ADDRESS |SRC PORT|  DST MAC ADDRESS |  DST IP ADDRESS |DST PORT|PACKET COUNT|TOTAL BANDWIDTH|AVG PACKET SIZE|\n";
-	private static String ipv6Title = "ETH TYPE|PROTOCOL|  SRC MAC ADDRESS |    SRC IP ADDRESS      |SRC PORT|  DST MAC ADDRESS |    DST IP ADDRESS      |DST PORT|PACKET COUNT|TOTAL BANDWIDTH|AVG PACKET SIZE|\n";   	
-	private static String ipv4Row = "%-8s|%-8s|%-18s|%-17s|%-8s|%-18s|%-17s|%-8s|%-12s|%-15s|%-15s\n";
-	private static String ipv6Row = "%-8s|%-8s|%-18s|%-25s|%-8s|%-18s|%-25s|%-8s|%-12s|%-15s|%-15s\n";
+	private static String ipv4Title = "ETH TYPE|PROTOCOL|  SRC MAC ADDRESS |  SRC IP ADDRESS |SRC PORT|  DST MAC ADDRESS |  DST IP ADDRESS |DST PORT|PACKET COUNT|  TOTAL BYTES  |AVG PACKET SIZE|\n";
+	private static String ipv6Title = "ETH TYPE|PROTOCOL|  SRC MAC ADDRESS |     SRC IP ADDRESS      |SRC PORT|  DST MAC ADDRESS |     DST IP ADDRESS      |DST PORT|PACKET COUNT|  TOTAL BYTES  |AVG PACKET SIZE|\n";   	
+	private static String ipv4Row = "%-8d|%-8d|%-18d|%-17d|%-8d|%-18d|%-17d|%-8d|%-12d|%-15d|%-15d\n";
+	private static String ipv6Row = "%-8d|%-8d|%-18d|%-25d|%-8d|%-18d|%-25d|%-8d|%-12d|%-15d|%-15d\n";
 	private static String ipv4Key = "%-8s|%-8s|%-18s|%-17s|%-8s|%-18s|%-17s|%-8s|";
 	private static String ipv6Key = "%-8s|%-8s|%-18s|%-25s|%-8s|%-18s|%-25s|%-8s|";
 	private static String ipValue = "%-12d|%-15d|%-15d\n";  
-
-	static public String createKey(AppComponent app, short etherType, byte protocol, MacAddress macSrc, byte[] ipSrc, short portSrc, MacAddress macDst, byte[] ipDst, short portDst) {
-
+	private static String ipv4Split = "-----------------------------------------------------------------------------------------------------------------------------------------------------------\n--------------------------------------------------------------------TOTAL COUNTS---------------------------------------------------------------------------\n-----------------------------------------------------------------------------------------------------------------------------------------------------------\n";
+	private static String ipv6Split = "---------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n---------------------------------------------------------------------------------TOTAL COUNTS------------------------------------------------------------------------------\n---------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n";
+	private static long totalPackets, totalPacketSize;
+	private static AppComponent app;
+	static public void addPacketTotals(long ps) {
+		totalPackets++;
+		totalPacketSize += ps;
+	}
+	
+	static public String createKey(AppComponent inspector, short etherType, byte protocol, MacAddress macSrc, byte[] ipSrc, short portSrc, MacAddress macDst, byte[] ipDst, short portDst) {
+		app = inspector;
 		String k1,k2,k3,k4="N/A",k5="N/A",k6,k7="N/A",k8="N/A";	
 		//etherType
 		switch (etherType) {
@@ -121,19 +129,16 @@ public class SourceDestType {
         if (portDst != 0) {
 			k8 = String.format("%d", Short.toUnsignedInt(portDst)); 
 		}
-		String keyrow = ipv4Key;
-		if (ipv6enabled == true) {
-			keyrow = ipv6Key;
-		}
+		String keyrow = ipv6Key;
 
 		app.getEthTypeList().add(k1);
         app.getProtocolList().add(k2);
-        app.getMACAddrList().add(k3);
-        app.getMACAddrList().add(k6);
-        app.getIPAddrList().add(k4);
-        app.getIPAddrList().add(k7);
-        app.getPortList().add(k5);
-        app.getPortList().add(k8);
+        app.getSMACAddrList().add(k3);
+        app.getDMACAddrList().add(k6);
+        app.getSIPAddrList().add(k4);
+        app.getDIPAddrList().add(k7);
+        app.getSPortList().add(k5);
+        app.getDPortList().add(k8);
 
 		return String.format(keyrow, k1,k2,k3,k4,k5,k6,k7,k8);	
 		//return String.format("%-10s|%-10s|%-18s|%s|%-8s|%-18s|%s|%-8s", k1,k2,k3,k4,k5,k6,k7,k8);
@@ -154,15 +159,13 @@ public class SourceDestType {
 	}
 
 
-	static public String outputStats(HashMap<String, PacketStatsType> stats) {
+	static public String outputStats(Map<String, PacketStatsType> stats) {
+		if (app != null) {
 		StringBuilder output = new StringBuilder();
-		String title = ipv4Title, row = ipv4Row;
-		if (ipv6enabled == true) {
-			title = ipv6Title;
-			row = ipv6Row;
-		}
+		String title = ipv6Title, row = ipv6Row, split = ipv6Split;
 		output.append(title);
-		
+	
+			
 		for (Map.Entry<String, PacketStatsType> entry : stats.entrySet()) {
 			long p1 = entry.getValue().packetCount;
 			long p2 = entry.getValue().packetBandwidth;
@@ -171,50 +174,93 @@ public class SourceDestType {
 			output.append(entry.getKey());
 			output.append(value); 
 		}
+		output.append(split);
+		output.append(title);
+		output.append(String.format(row,        
+		app.getEthTypeList().size(),
+        app.getProtocolList().size(),
+        app.getSMACAddrList().size(),
+        app.getSIPAddrList().size(),
+        app.getSPortList().size(),
+        app.getDMACAddrList().size(),
+        app.getDIPAddrList().size(),
+        app.getDPortList().size(), totalPackets, totalPacketSize, totalPacketSize/totalPackets));
 
 		return output.toString();
+		}
+		else return "No detected traffic yet";
 	}
 
-	static public String outputStats(HashMap<String, PacketStatsType> stats, String [] args) {
+	static public String outputStats(Map<String, PacketStatsType> stats, String [] args) {
 		StringBuilder output = new StringBuilder();
-        String title = ipv4Title, row = ipv4Row;
-        if (ipv6enabled == true) {
-            title = ipv6Title;
-            row = ipv6Row;
-        }
+        String title = ipv6Title, row = ipv6Row;
         output.append(title);
+		//a mapping of key index (col number) and the desired matching field
 		HashMap<Integer, String> matches = new HashMap<Integer, String>();
 		for (int i = 0; i < args.length; i++) {
 			if (args[i] != null) {
 				matches.put(i, args[i]);
 			}
 		}
+		//if no desired fields, i.e. no options were entered, then process it normally
 		if (matches.size() == 0) {
 			return SourceDestType.outputStats(stats);
 		}	
 		
+		//current row of keys to match against	
 		String [] keys = {};
-        for (Map.Entry<String, PacketStatsType> entry : stats.entrySet()) {
+		//used to count the unique member of each set of categories (keys)
+        ArrayList<HashSet<String>> keyCounts = new ArrayList<HashSet<String>>();
+		for (int i = 0; i < 8; i++)
+		{
+			keyCounts.add(new HashSet<String>());
+		}
+		long p1total = 0, p2total = 0;
+		//split the HashMap key into the various keys
+		for (Map.Entry<String, PacketStatsType> entry : stats.entrySet()) {
 			keys = entry.getKey().split("\\s*\\|");
 			
 			boolean match = true;
+			//if the desired field matches the corresponding key, keep going
 			for (Map.Entry<Integer,String> k : matches.entrySet()) {
+				//as soon as it doesn't match, drop it and move on
 				if (keys[k.getKey()].equals(k.getValue()) == false) {
 					match = false;
 					break;
 				}
 			}		
-			if (match == true) {	
+			//if matched, we add it to our output, and count it
+			if (match == true) {
+				for (int i = 0; i < 8; i++)
+				{
+					keyCounts.get(i).add(keys[i]);
+				}	
             	long p1 = entry.getValue().packetCount;
             	long p2 = entry.getValue().packetBandwidth;
             	long p3 = p2/p1;
+				p1total += p1;
+				p2total += p2;
             	String value = String.format(ipValue, p1, p2, p3);
             	output.append(entry.getKey());
             	output.append(value);
 			}
         }
+		if (p1total > 0) {
+		output.append(ipv6Split);
+		output.append(ipv6Title);
+		output.append(String.format(ipv6Row,        
+		keyCounts.get(0).size(),
+        keyCounts.get(1).size(),
+        keyCounts.get(2).size(),
+        keyCounts.get(3).size(),
+        keyCounts.get(4).size(),
+        keyCounts.get(5).size(),
+        keyCounts.get(6).size(),
+        keyCounts.get(7).size(), p1total, p2total, p2total/p1total));
 
 		return output.toString();
+		}
+		else return "No traffic matches this criteria";
 		// + "\n" + matches.get(0) + "\n" + String.format("%s,%s,%s,%s,%s,%s,%s,%s", keys[0],keys[1], keys[2],keys[3],keys[4],keys[5],keys[6],keys[7]);
 
 

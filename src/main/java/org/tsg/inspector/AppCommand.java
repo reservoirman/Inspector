@@ -112,12 +112,21 @@ public class AppCommand extends AbstractShellCommand {
 	if (ips != null) {
 		//print(ips.getStats());
 		String [] abc = {a, b, c, d, e, f, g, h};
-		print(ips.getStats(abc));
-		
-		 System.out.println("Working Directory = " +
-              System.getProperty("user.dir"));
-	
+		try {
+			print(ips.getStats(abc));
 		//AppCommand.tryDB();	
+		}
+		catch (Exception e) {
+			System.out.println(e.getMessage());
+            StackTraceElement[] st = e.getStackTrace();
+            for (int i =0 ; i < st.length; i++)
+            {
+                System.out.println(st[i].toString());
+            }
+
+
+		}
+		
 	}
 	
 	//print(">");

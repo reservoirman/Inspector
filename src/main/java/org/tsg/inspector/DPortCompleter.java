@@ -33,7 +33,7 @@ import static org.onosproject.cli.AbstractShellCommand.get;
 /**
  * All installed application name completer.
  */
-public class PortCompleter extends AbstractChoicesCompleter {
+public class DPortCompleter extends AbstractChoicesCompleter {
 
 	public static int PacketSize = 0;
 
@@ -45,7 +45,7 @@ public class PortCompleter extends AbstractChoicesCompleter {
         Iterator<Application> it = service.getApplications().iterator();
 	
 	InspectorPacketService ips =  get(InspectorPacketService.class);
-	ArrayList<String> portList = new ArrayList<String>(ips.getPortList());
+	ArrayList<String> portList = new ArrayList<String>(ips.getDPortList());
 
         // Filter the list of apps, selecting only the installed ones.
         // Add each app name to the list of choices.

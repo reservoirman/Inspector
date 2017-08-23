@@ -19,12 +19,12 @@
         <command>
             <action class="org.tsg.inspector.AppCommand"/>
 			<optional-completers>
-		 		<entry key="-sip" value-ref="IpCompleter"/>
-		 		<entry key="-dip" value-ref="IpCompleter"/>
-		 		<entry key="-dmac" value-ref="MacCompleter"/>
-		 		<entry key="-smac" value-ref="MacCompleter"/>
-		 		<entry key="-sport" value-ref="PortCompleter"/>
-		 		<entry key="-dport" value-ref="PortCompleter"/>
+		 		<entry key="-sip" value-ref="SIpCompleter"/>
+		 		<entry key="-dip" value-ref="DIpCompleter"/>
+		 		<entry key="-dmac" value-ref="SMacCompleter"/>
+		 		<entry key="-smac" value-ref="DMacCompleter"/>
+		 		<entry key="-sport" value-ref="SPortCompleter"/>
+		 		<entry key="-dport" value-ref="DPortCompleter"/>
 		 		<entry key="-ethtype" value-ref="EtherTypeCompleter"/>
 		 		<entry key="-protocol" value-ref="ProtocolCompleter"/>
             </optional-completers>
@@ -33,9 +33,12 @@
 			<action class="org.tsg.inspector.CommandClear"/>	
 		</command>
     </command-bundle>
-    <bean id="IpCompleter" class="org.tsg.inspector.IPAddressCompleter"/>
-    <bean id="MacCompleter" class="org.tsg.inspector.MACAddressCompleter"/>
-    <bean id="PortCompleter" class="org.tsg.inspector.PortCompleter"/>
+    <bean id="SIpCompleter" class="org.tsg.inspector.SIPAddressCompleter"/>
+    <bean id="SMacCompleter" class="org.tsg.inspector.SMACAddressCompleter"/>
+    <bean id="SPortCompleter" class="org.tsg.inspector.SPortCompleter"/>
+    <bean id="DIpCompleter" class="org.tsg.inspector.DIPAddressCompleter"/>
+    <bean id="DMacCompleter" class="org.tsg.inspector.DMACAddressCompleter"/>
+    <bean id="DPortCompleter" class="org.tsg.inspector.DPortCompleter"/>
     <bean id="EtherTypeCompleter" class="org.tsg.inspector.EtherTypeCompleter"/>
     <bean id="ProtocolCompleter" class="org.tsg.inspector.ProtocolCompleter"/>
 </blueprint>

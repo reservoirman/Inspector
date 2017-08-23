@@ -68,6 +68,7 @@ import java.util.*;
 import org.onlab.packet.ARP;
 import org.onlab.packet.MacAddress;
 import java.io.*;
+import java.util.concurrent.*;
 //import org.apache.karaf.shell.commands.Command;
 //import org.onosproject.cli.AbstractShellCommand;
 //import org.apache.karaf.shell.commands.Argument;
@@ -378,19 +379,31 @@ public class AppComponent implements InspectorPacketService {
         return enabled;
     }
 
-		private HashSet<String> ipAddrList = new HashSet<String>();
-		private HashSet<String> macAddrList = new HashSet<String>();
-		private HashSet<String> portList = new HashSet<String>();
+		private HashSet<String> sipAddrList = new HashSet<String>();
+		private HashSet<String> smacAddrList = new HashSet<String>();
+		private HashSet<String> sportList = new HashSet<String>();
+		private HashSet<String> dipAddrList = new HashSet<String>();
+		private HashSet<String> dmacAddrList = new HashSet<String>();
+		private HashSet<String> dportList = new HashSet<String>();
 		private HashSet<String> protocolList = new HashSet<String>();
 		private HashSet<String> ethTypeList = new HashSet<String>();
-	    public Set<String> getIPAddrList() {
-			return ipAddrList;
+	    public Set<String> getSIPAddrList() {
+			return sipAddrList;
 		}
-    	public Set<String> getMACAddrList() {
-			return macAddrList;
+    	public Set<String> getSMACAddrList() {
+			return smacAddrList;
 		}
-		public Set<String> getPortList() {
-			return portList;
+		public Set<String> getSPortList() {
+			return sportList;
+		}
+	    public Set<String> getDIPAddrList() {
+			return dipAddrList;
+		}
+    	public Set<String> getDMACAddrList() {
+			return dmacAddrList;
+		}
+		public Set<String> getDPortList() {
+			return dportList;
 		}
 		public Set<String> getEthTypeList() {
 			return ethTypeList;
@@ -399,7 +412,7 @@ public class AppComponent implements InspectorPacketService {
 			return protocolList;
 		}
 
-		HashMap<String, PacketStatsType> stats = new HashMap<String, PacketStatsType>();
+		ConcurrentHashMap<String, PacketStatsType> stats = new ConcurrentHashMap<String, PacketStatsType>();
 		
 		public void gatherStatistics(PacketContext context) {
 			InboundPacket pkt = context.inPacket();
@@ -465,20 +478,7 @@ public class AppComponent implements InspectorPacketService {
 			}
 
 			String key = SourceDestType.createKey(this, ethType, protocol, srcMac, srcIp, srcPort, dstMac, dstIp, dstPort);
-			//System.out.println("key = " + key);
-			//log.info("key = {}", key);
 		
-			//split key and add the various fields to their respective HashSets: (now being done in SourceDestType)
-			/* String k[] = s.split("[\\p{Punct}\\s]+");
-			ethTypeList.add(k[0]);
-			protocolList.add(k[1]);
-			macAddressList.add(k[2]);
-			macAddressList.add(k[5]);
-			ipAddressList.add(k[3]);
-			ipAddressList.add(k[6]);
-			portList.add(k[4]);
-			portList.add(k[7]);			
-			*/
 			//get packet size
 			long packetSize = pkt.unparsed().capacity();
 			
@@ -495,7 +495,7 @@ public class AppComponent implements InspectorPacketService {
 				p.packetBandwidth += packetSize;
 			}
 			stats.put(key, p);
-
+			SourceDestType.addPacketTotals(packetSize);
 			//System.out.println("%packet size = " +  pkt.unparsed().capacity());
 			//log.info("PacketService = {}", packetService.toString());
 		}
@@ -539,7 +539,7 @@ public class AppComponent implements InspectorPacketService {
                 return;
             }
 
-
+			/*
             // Bail if this is deemed to be a control packet.
             if (isControlPacket(ethPkt)) {
                 return;
@@ -550,14 +550,14 @@ public class AppComponent implements InspectorPacketService {
                 return;
             }
 
-            HostId id = HostId.hostId(ethPkt.getDestinationMAC());
 
             // Do not process link-local addresses in any way.
             if (id.mac().isLinkLocal()) {
                 return;
             }
-
+			*/
             // Do we know who this is for? If not, flood and bail.
+            HostId id = HostId.hostId(ethPkt.getDestinationMAC());
             Host dst = hostService.getHost(id);
             if (dst == null) {
                 flood(context);
@@ -568,7 +568,7 @@ public class AppComponent implements InspectorPacketService {
             // simply forward out to the destination and bail.
             if (pkt.receivedFrom().deviceId().equals(dst.location().deviceId())) {
                 if (!context.inPacket().receivedFrom().port().equals(dst.location().port())) {
-                    installRule(context, dst.location().port());
+                    packetOut(context, dst.location().port());
                 }
                 return;
             }
@@ -597,7 +597,7 @@ public class AppComponent implements InspectorPacketService {
             }
 
             // Otherwise forward and be done with it.
-            installRule(context, path.src().port());
+			packetOut(context, path.src().port());
         }
 
     }
@@ -640,151 +640,4 @@ public class AppComponent implements InspectorPacketService {
         context.send();
     }
 
-    // Install a rule forwarding the packet to the specified port.
-    private void installRule(PacketContext context, PortNumber portNumber) {
-        //
-        // We don't support (yet) buffer IDs in the Flow Service so
-        // packet out first.
-        //
-        Ethernet inPkt = context.inPacket().parsed();
-        TrafficSelector.Builder selectorBuilder = DefaultTrafficSelector.builder();
-
-	packetOut(context, portNumber); return;
-	/*
-        // If PacketOutOnly or ARP packet than forward directly to output port
-        if (packetOutOnly || inPkt.getEtherType() == Ethernet.TYPE_ARP) {
-            packetOut(context, portNumber);
-            return;
-        }
-
-        //
-        // If matchDstMacOnly
-        //    Create flows matching dstMac only
-        // Else
-        //    Create flows with default matching and include configured fields
-        //
-        if (matchDstMacOnly) {
-            selectorBuilder.matchEthDst(inPkt.getDestinationMAC());
-        } else {
-            selectorBuilder.matchInPort(context.inPacket().receivedFrom().port())
-                    .matchEthSrc(inPkt.getSourceMAC())
-                    .matchEthDst(inPkt.getDestinationMAC());
-
-            // If configured Match Vlan ID
-            if (matchVlanId && inPkt.getVlanID() != Ethernet.VLAN_UNTAGGED) {
-                selectorBuilder.matchVlanId(VlanId.vlanId(inPkt.getVlanID()));
-            }
-
-            //
-            // If configured and EtherType is IPv4 - Match IPv4 and
-            // TCP/UDP/ICMP fields
-            //
-            if (matchIpv4Address && inPkt.getEtherType() == Ethernet.TYPE_IPV4) {
-                IPv4 ipv4Packet = (IPv4) inPkt.getPayload();
-                byte ipv4Protocol = ipv4Packet.getProtocol();
-                Ip4Prefix matchIp4SrcPrefix =
-                    Ip4Prefix.valueOf(ipv4Packet.getSourceAddress(),
-                                      Ip4Prefix.MAX_MASK_LENGTH);
-                Ip4Prefix matchIp4DstPrefix =
-                    Ip4Prefix.valueOf(ipv4Packet.getDestinationAddress(),
-                                      Ip4Prefix.MAX_MASK_LENGTH);
-                selectorBuilder.matchEthType(Ethernet.TYPE_IPV4)
-                        .matchIPSrc(matchIp4SrcPrefix)
-                        .matchIPDst(matchIp4DstPrefix);
-
-                if (matchIpv4Dscp) {
-                    byte dscp = ipv4Packet.getDscp();
-                    byte ecn = ipv4Packet.getEcn();
-                    selectorBuilder.matchIPDscp(dscp).matchIPEcn(ecn);
-                }
-
-                if (matchTcpUdpPorts && ipv4Protocol == IPv4.PROTOCOL_TCP) {
-                    TCP tcpPacket = (TCP) ipv4Packet.getPayload();
-                    selectorBuilder.matchIPProtocol(ipv4Protocol)
-                            .matchTcpSrc(tcpPacket.getSourcePort())
-                            .matchTcpDst(tcpPacket.getDestinationPort());
-                }
-                if (matchTcpUdpPorts && ipv4Protocol == IPv4.PROTOCOL_UDP) {
-                    UDP udpPacket = (UDP) ipv4Packet.getPayload();
-                    selectorBuilder.matchIPProtocol(ipv4Protocol)
-                            .matchUdpSrc(udpPacket.getSourcePort())
-                            .matchUdpDst(udpPacket.getDestinationPort());
-                }
-                if (matchIcmpFields && ipv4Protocol == IPv4.PROTOCOL_ICMP) {
-                    ICMP icmpPacket = (ICMP) ipv4Packet.getPayload();
-                    selectorBuilder.matchIPProtocol(ipv4Protocol)
-                            .matchIcmpType(icmpPacket.getIcmpType())
-                            .matchIcmpCode(icmpPacket.getIcmpCode());
-                }
-            }
-
-            //
-            // If configured and EtherType is IPv6 - Match IPv6 and
-            // TCP/UDP/ICMP fields
-            //
-            if (matchIpv6Address && inPkt.getEtherType() == Ethernet.TYPE_IPV6) {
-                IPv6 ipv6Packet = (IPv6) inPkt.getPayload();
-                byte ipv6NextHeader = ipv6Packet.getNextHeader();
-                Ip6Prefix matchIp6SrcPrefix =
-                    Ip6Prefix.valueOf(ipv6Packet.getSourceAddress(),
-                                      Ip6Prefix.MAX_MASK_LENGTH);
-                Ip6Prefix matchIp6DstPrefix =
-                    Ip6Prefix.valueOf(ipv6Packet.getDestinationAddress(),
-                                      Ip6Prefix.MAX_MASK_LENGTH);
-                selectorBuilder.matchEthType(Ethernet.TYPE_IPV6)
-                        .matchIPv6Src(matchIp6SrcPrefix)
-                        .matchIPv6Dst(matchIp6DstPrefix);
-
-                if (matchIpv6FlowLabel) {
-                    selectorBuilder.matchIPv6FlowLabel(ipv6Packet.getFlowLabel());
-                }
-
-                if (matchTcpUdpPorts && ipv6NextHeader == IPv6.PROTOCOL_TCP) {
-                    TCP tcpPacket = (TCP) ipv6Packet.getPayload();
-                    selectorBuilder.matchIPProtocol(ipv6NextHeader)
-                            .matchTcpSrc(tcpPacket.getSourcePort())
-                            .matchTcpDst(tcpPacket.getDestinationPort());
-                }
-                if (matchTcpUdpPorts && ipv6NextHeader == IPv6.PROTOCOL_UDP) {
-                    UDP udpPacket = (UDP) ipv6Packet.getPayload();
-                    selectorBuilder.matchIPProtocol(ipv6NextHeader)
-                            .matchUdpSrc(udpPacket.getSourcePort())
-                            .matchUdpDst(udpPacket.getDestinationPort());
-                }
-                if (matchIcmpFields && ipv6NextHeader == IPv6.PROTOCOL_ICMP6) {
-                    ICMP6 icmp6Packet = (ICMP6) ipv6Packet.getPayload();
-                    selectorBuilder.matchIPProtocol(ipv6NextHeader)
-                            .matchIcmpv6Type(icmp6Packet.getIcmpType())
-                            .matchIcmpv6Code(icmp6Packet.getIcmpCode());
-                }
-            }
-        }
-        TrafficTreatment treatment = DefaultTrafficTreatment.builder()
-                .setOutput(portNumber)
-                .build();
-
-        ForwardingObjective forwardingObjective = DefaultForwardingObjective.builder()
-                .withSelector(selectorBuilder.build())
-                .withTreatment(treatment)
-                .withPriority(flowPriority)
-                .withFlag(ForwardingObjective.Flag.VERSATILE)
-                .fromApp(appId)
-                .makeTemporary(flowTimeout)
-                .add();
-
-        flowObjectiveService.forward(context.inPacket().receivedFrom().deviceId(),
-                                     forwardingObjective);
-
-        //
-        // If packetOutOfppTable
-        //  Send packet back to the OpenFlow pipeline to match installed flow
-        // Else
-        //  Send packet direction on the appropriate port
-        //
-        if (packetOutOfppTable) {
-            packetOut(context, PortNumber.TABLE);
-        } else {
-            packetOut(context, portNumber);
-        }*/
-    }
 }

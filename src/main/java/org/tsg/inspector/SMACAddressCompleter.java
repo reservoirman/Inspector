@@ -33,7 +33,7 @@ import static org.onosproject.cli.AbstractShellCommand.get;
 /**
  * All installed application name completer.
  */
-public class MACAddressCompleter extends AbstractChoicesCompleter {
+public class SMACAddressCompleter extends AbstractChoicesCompleter {
 
 	public static int PacketSize = 0;
 
@@ -45,7 +45,7 @@ public class MACAddressCompleter extends AbstractChoicesCompleter {
         Iterator<Application> it = service.getApplications().iterator();
 	
 	InspectorPacketService ips =  get(InspectorPacketService.class);
-	ArrayList<String> macList = new ArrayList<String>(ips.getMACAddrList());
+	ArrayList<String> macList = new ArrayList<String>(ips.getSMACAddrList());
 
         // Filter the list of apps, selecting only the installed ones.
         // Add each app name to the list of choices.
