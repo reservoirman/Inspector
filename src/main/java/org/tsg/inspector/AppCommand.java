@@ -38,39 +38,39 @@ import org.sqlite.JDBC;
  * Sample Apache Karaf CLI command
  */
 @Command(scope = "onos", name = "stats",
-         description = "Displays the default table with the following columns: source IP, source MAC, source port, dest IP, dest MAC, dest port, protocol, packet count, packet avg size, packet bandwidth")
+         description = "Displays the default table with the following columns: source IP, source MAC, source port, dest IP, dest MAC, dest port, protocol, packet count, total bytes, avg packet size.  Aggregate values for each will also be shown.")
 public class AppCommand extends AbstractShellCommand {
 
     // Selectors
-    @Option(name = "-sip", description = "Displays the packets from the specified source IP address only.  A list of source IP addresses may also be specified.  Aggregate values for each will also be shown.",
+    @Option(name = "-sip", description = "Displays the packets from the specified source IP address only",
             required = false, multiValued = false)
     private String d = null;
 
-    @Option(name = "-dip", description = "Displays the packets from the specified destination IP address only.  A list of destination IP addresses may also be specified.  Aggregate values for each will also be shown.",
+    @Option(name = "-dip", description = "Displays the packets from the specified destination IP address only",
             required = false, multiValued = false)
     private String g = null;
 
-    @Option(name = "-smac", description = "Displays the packets from the specified source MAC address only.  A list of source MAC addresses may also be specified.  Aggregate values for each will also be shown.",
+    @Option(name = "-smac", description = "Displays the packets from the specified source MAC address only",
             required = false, multiValued = false)
     private String c = null;
 
-    @Option(name = "-dmac", description = "Displays the packets from the specified destination MAC address only.  A list of destination MAC addresses may also be specified.  Aggregate values for each will also be shown.",
+    @Option(name = "-dmac", description = "Displays the packets from the specified destination MAC address only",
             required = false, multiValued = false)
     private String f = null;
 
-    @Option(name = "-sport", description = "Displays the packets from the specified source TCP port only.  A list of source ports may also be specified",
+    @Option(name = "-sport", description = "Displays the packets from the specified source TCP port only",
             required = false, multiValued = false)
     private String e = null;
 
-    @Option(name = "-dport", description = "Displays the packets from the specified destination TCP port only.  A list of destination ports may also be specified",
+    @Option(name = "-dport", description = "Displays the packets from the specified destination TCP port only",
             required = false, multiValued = false)
     private String h = null;
 
-    @Option(name = "-protocol", description = "Displays the packets for the specified protocol only.  A list of protocols may also be specified",
+    @Option(name = "-protocol", description = "Displays the packets for the specified protocol only",
             required = false, multiValued = false)
     private String b = null;
 
-    @Option(name = "-ethtype", description = "Displays the packets for the specified ethernet type only.  A list of protocols may also be specified",
+    @Option(name = "-ethtype", description = "Displays the packets for the specified Ethernet type only",
             required = false, multiValued = false)
     private String a = null;
 
